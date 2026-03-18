@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, writeFileSync, readdirSync, unlinkSync, renameSync } from "fs";
 import { dirname, join, basename } from "path";
 import { randomBytes } from "crypto";
+import { logToFile } from "../utils/logger.js";
 
 const MAX_BACKUPS = 3;
 
@@ -8,7 +9,8 @@ export function readJsonFile<T>(filePath: string): T | null {
   if (!existsSync(filePath)) return null;
   try {
     return JSON.parse(readFileSync(filePath, "utf-8")) as T;
-  } catch {
+  } catch (err) {
+    logToFile(`Failed to read JSON: ${filePath}`, err);
     return null;
   }
 }

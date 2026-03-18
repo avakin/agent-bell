@@ -1,8 +1,9 @@
 import type { BellEvent } from "../types/index.js";
 import { loadConfig } from "../core/config-manager.js";
 import { acquireLock, releaseLock } from "../core/lock.js";
-import { shouldPlay, shouldEscalate, recordPlay, clearEscalation } from "../core/state-manager.js";
+import { shouldPlay, shouldEscalate, recordPlay, clearEscalation, isPaused } from "../core/state-manager.js";
 import { notify } from "../core/notifiers/index.js";
+import { logToFile } from "../utils/logger.js";
 
 const VALID_EVENTS = new Set<string>([
   "task-complete",
@@ -19,6 +20,7 @@ const VALID_EVENTS = new Set<string>([
 export async function playCommand(event: string, source?: string): Promise<void> {
   try {
     if (!VALID_EVENTS.has(event)) return;
+    if (isPaused()) return;
 
     const bellEvent = event as BellEvent;
     const config = loadConfig();
@@ -52,7 +54,7 @@ export async function playCommand(event: string, source?: string): Promise<void>
     } finally {
       releaseLock();
     }
-  } catch {
-    // Swallow all errors — hooks must never fail
+  } catch (err) {
+    logToFile("Unhandled error in play command", err);
   }
 }

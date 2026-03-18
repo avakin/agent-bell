@@ -1,6 +1,7 @@
-import { spawn } from "child_process";
 import type { NotificationPayload } from "./types.js";
 import { SOURCE_LABELS, EVENT_LABELS } from "./types.js";
+import { spawnWithTimeout } from "../../utils/spawn.js";
+import { logToFile } from "../../utils/logger.js";
 
 export function isAvailable(): boolean {
   return !!process.env.TMUX;
@@ -16,12 +17,8 @@ export function send(payload: NotificationPayload): void {
   const message = `${source}: ${event}`;
 
   try {
-    const child = spawn("tmux", ["display-message", message], {
-      detached: true,
-      stdio: "ignore",
-    });
-    child.unref();
-  } catch {
-    // Never throw
+    spawnWithTimeout("tmux", ["display-message", message]);
+  } catch (err) {
+    logToFile("Failed to send tmux notification", err);
   }
 }

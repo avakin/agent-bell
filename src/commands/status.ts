@@ -4,6 +4,7 @@ import { loadThemeManifest } from "../core/theme-manager.js";
 import { getClaudeHookStatus } from "../hooks/claude.js";
 import { getCursorHookStatus } from "../hooks/cursor.js";
 import { getGeminiHookStatus } from "../hooks/gemini.js";
+import { isPaused } from "../core/state-manager.js";
 import { log } from "../utils/logger.js";
 import { checkAccessibility } from "../utils/accessibility.js";
 import { getPlatform } from "../utils/platform.js";
@@ -12,6 +13,11 @@ export function statusCommand(): void {
   const config = loadConfig();
 
   log.banner();
+
+  // Paused indicator
+  if (isPaused()) {
+    console.log(`  ${chalk.yellow.bold("⏸  PAUSED")} — run 'agent-bell resume' to unpause\n`);
+  }
 
   // Theme
   const manifest = loadThemeManifest(config.theme);

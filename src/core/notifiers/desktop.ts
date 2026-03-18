@@ -1,10 +1,11 @@
-import { spawn } from "child_process";
 import { writeFileSync } from "fs";
 import { join, basename } from "path";
 import { tmpdir } from "os";
 import { randomBytes } from "crypto";
 import type { NotificationPayload } from "./types.js";
 import { SOURCE_LABELS, EVENT_LABELS } from "./types.js";
+import { spawnWithTimeout } from "../../utils/spawn.js";
+import { logToFile } from "../../utils/logger.js";
 
 const NOTIFIER_PATH = join(
   import.meta.dirname,
@@ -86,20 +87,12 @@ export function send(payload: NotificationPayload): void {
         ` ; rm -f '${escapeShellArg(scriptPath)}'`,
       ].join("");
 
-      const child = spawn("sh", ["-c", shell], {
-        detached: true,
-        stdio: "ignore",
-      });
-      child.unref();
+      spawnWithTimeout("sh", ["-c", shell], undefined, 35_000);
     } else {
       const script = `display notification ${JSON.stringify(body)} with title ${JSON.stringify(title)}`;
-      const child = spawn("osascript", ["-e", script], {
-        detached: true,
-        stdio: "ignore",
-      });
-      child.unref();
+      spawnWithTimeout("osascript", ["-e", script], undefined, 35_000);
     }
-  } catch {
-    // Never throw
+  } catch (err) {
+    logToFile("Failed to send desktop notification", err);
   }
 }

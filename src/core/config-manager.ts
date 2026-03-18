@@ -4,6 +4,7 @@ import { join, dirname } from "path";
 import { randomBytes } from "crypto";
 import { AgentBellConfig, DEFAULT_CONFIG } from "../types/index.js";
 import { deepMerge } from "../hooks/common.js";
+import { logToFile } from "../utils/logger.js";
 
 const CONFIG_DIR = join(homedir(), ".agent-bell");
 const CONFIG_FILE = join(CONFIG_DIR, "config.json");
@@ -34,7 +35,8 @@ export function loadConfig(): AgentBellConfig {
       DEFAULT_CONFIG as unknown as Record<string, unknown>,
       parsed as unknown as Record<string, unknown>,
     ) as unknown as AgentBellConfig;
-  } catch {
+  } catch (err) {
+    logToFile("Failed to parse config, using defaults", err);
     return { ...DEFAULT_CONFIG };
   }
 }
