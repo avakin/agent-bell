@@ -21,6 +21,9 @@ const { configShowCommand, configSetCommand } = await import("./commands/config.
 const { themesListCommand, themesPreviewCommand, themesAddCommand } = await import("./commands/themes.js");
 const { statusCommand } = await import("./commands/status.js");
 const { uninstallCommand } = await import("./commands/uninstall.js");
+const { pauseCommand, resumeCommand } = await import("./commands/pause.js");
+const { testCommand } = await import("./commands/test.js");
+const { doctorCommand } = await import("./commands/doctor.js");
 
 const program = new Command();
 
@@ -98,6 +101,37 @@ program
   .description("Show current setup and hook status")
   .action(() => {
     statusCommand();
+  });
+
+// Pause / Resume
+program
+  .command("pause")
+  .description("Temporarily silence all notifications")
+  .action(() => {
+    pauseCommand();
+  });
+
+program
+  .command("resume")
+  .description("Resume notifications after pausing")
+  .action(() => {
+    resumeCommand();
+  });
+
+// Test
+program
+  .command("test")
+  .description("Fire a test notification to verify your setup")
+  .action(() => {
+    testCommand();
+  });
+
+// Doctor
+program
+  .command("doctor")
+  .description("Diagnose common issues with your setup")
+  .action(() => {
+    doctorCommand();
   });
 
 // Uninstall

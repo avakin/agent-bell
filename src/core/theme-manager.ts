@@ -3,6 +3,7 @@ import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { homedir } from "os";
 import type { BellEvent, ThemeManifest } from "../types/index.js";
+import { logToFile } from "../utils/logger.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -37,7 +38,8 @@ export function loadThemeManifest(themeName: string): ThemeManifest | null {
 
   try {
     return JSON.parse(readFileSync(manifestPath, "utf-8")) as ThemeManifest;
-  } catch {
+  } catch (err) {
+    logToFile("Failed to parse theme manifest", err);
     return null;
   }
 }

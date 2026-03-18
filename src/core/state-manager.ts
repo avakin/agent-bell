@@ -1,17 +1,36 @@
-import { existsSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, readFileSync, writeFileSync, unlinkSync } from "fs";
 import { join } from "path";
 import { getConfigDir, ensureConfigDir } from "./config-manager.js";
 import type { PlayState } from "../types/index.js";
+import { logToFile } from "../utils/logger.js";
 
 const STATE_FILE = join(getConfigDir(), "state.json");
+const PAUSED_FILE = join(getConfigDir(), ".paused");
+
+export function isPaused(): boolean {
+  return existsSync(PAUSED_FILE);
+}
+
+export function setPaused(paused: boolean): void {
+  ensureConfigDir();
+  if (paused) {
+    writeFileSync(PAUSED_FILE, new Date().toISOString(), "utf-8");
+  } else {
+    try {
+      unlinkSync(PAUSED_FILE);
+    } catch {
+      // Already removed
+    }
+  }
+}
 
 function loadState(): PlayState {
   try {
     if (existsSync(STATE_FILE)) {
       return JSON.parse(readFileSync(STATE_FILE, "utf-8")) as PlayState;
     }
-  } catch {
-    // Corrupt state — reset
+  } catch (err) {
+    logToFile("Failed to parse state file, resetting", err);
   }
   return { lastPlayed: {}, escalationTracking: {} };
 }
