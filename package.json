@@ -1,0 +1,55 @@
+{
+  "name": "agent-bell",
+  "version": "0.1.0",
+  "description": "Audio notifications for AI coding agents — Claude Code, Cursor, Gemini CLI",
+  "type": "module",
+  "bin": {
+    "agent-bell": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "cli",
+    "audio",
+    "notifications",
+    "ai",
+    "claude",
+    "cursor",
+    "gemini",
+    "hooks"
+  ],
+  "author": "avakin",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/avakin/agent-bell.git"
+  },
+  "homepage": "https://github.com/avakin/agent-bell",
+  "bugs": {
+    "url": "https://github.com/avakin/agent-bell/issues"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "inquirer": "^9.3.7",
+    "node-notifier": "^10.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/node-notifier": "^8.0.5",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist",
+    "assets"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "galactic",
+  "description": "Spacey, futuristic notification sounds",
+  "author": "agent-bell",
+  "sounds": {
+    "task-complete": "task-complete.wav",
+    "task-complete-escalated": "task-complete-escalated.wav",
+    "needs-input": "needs-input.wav",
+    "needs-input-escalated": "needs-input-escalated.wav",
+    "error": "error.wav"
+  }
+}
