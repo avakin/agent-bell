@@ -30,6 +30,29 @@ Or run directly without installing:
 npx agent-bell init
 ```
 
+## Updating
+
+If you installed globally:
+
+```bash
+npm update -g agent-bell
+```
+
+If you use `npx`, it caches the package locally. To force the latest version:
+
+```bash
+npx agent-bell@latest init
+```
+
+After updating, verify your setup still works:
+
+```bash
+agent-bell test
+agent-bell doctor
+```
+
+If you've customized hooks, re-run `agent-bell init` to pick up any new events or hook format changes introduced in the update.
+
 ## Quick Start
 
 ```bash
