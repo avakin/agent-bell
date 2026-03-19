@@ -26,6 +26,17 @@ function getBundleId(): string | undefined {
   return process.env.__CFBundleIdentifier ?? undefined;
 }
 
+const TERMINAL_EMULATOR_BUNDLE_IDS = new Set([
+  "com.apple.Terminal",
+  "com.googlecode.iterm2",
+  "net.kovidgoyal.kitty",
+  "com.mitchellh.ghostty",
+  "dev.warp.Warp-Stable",
+  "co.zeit.hyper",
+  "io.wezfurlong.wezterm",
+  "org.alacritty",
+]);
+
 function escapeShellArg(s: string): string {
   return s.replace(/'/g, "'\\''");
 }
@@ -49,23 +60,19 @@ export function send(payload: NotificationPayload): void {
 
       // Write the activate AppleScript to a temp file to avoid shell quoting issues
       const scriptPath = join(tmpdir(), `agent-bell-${randomBytes(4).toString("hex")}.applescript`);
-      // Terminal-based tools (Claude Code, Gemini CLI, OpenCode) run inside a generic
-      // terminal emulator. `open -b <terminal> <path>` would open a NEW terminal window
-      // at that path instead of focusing the existing one. Skip Phase 1 for these tools
-      // and rely solely on AXRaise to find + raise the correct window.
-      const TERMINAL_SOURCES = new Set(["claude", "gemini", "opencode"]);
-      const isTerminalTool = TERMINAL_SOURCES.has(payload.source ?? "");
-
-      const openCmd = `open -b '${escapeShellArg(bundleId)}' '${escapeShellArg(projectPath)}'`;
+      // Phase 1: open -b triggers macOS Space switch
+      // For terminal emulators, omit path to avoid opening a new window
+      // For IDEs, include path to focus the correct project window
+      // Phase 2: AXRaise ensures the correct window is frontmost within that Space
+      const isTerminalEmulator = TERMINAL_EMULATOR_BUNDLE_IDS.has(bundleId);
+      const openCmd = isTerminalEmulator
+        ? `open -b '${escapeShellArg(bundleId)}'`
+        : `open -b '${escapeShellArg(bundleId)}' '${escapeShellArg(projectPath)}'`;
       const activateScript = [
-        // Phase 1: Space switch via open -b (skip for terminal tools — would open new window)
-        ...(isTerminalTool ? [] : [
-          "try",
-          `  do shell script "${escapeAppleScriptString(openCmd)}"`,
-          "  delay 0.3",
-          "end try",
-        ]),
-        // Phase 2: AXRaise to target the correct window
+        "try",
+        `  do shell script "${escapeAppleScriptString(openCmd)}"`,
+        "  delay 0.3",
+        "end try",
         "try",
         '  tell application "System Events"',
         `    tell (first process whose bundle identifier is "${bundleId}")`,
