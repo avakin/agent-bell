@@ -49,14 +49,23 @@ export function send(payload: NotificationPayload): void {
 
       // Write the activate AppleScript to a temp file to avoid shell quoting issues
       const scriptPath = join(tmpdir(), `agent-bell-${randomBytes(4).toString("hex")}.applescript`);
-      // Phase 1: open -b triggers macOS Space switch to the window showing this project
-      // Phase 2: AXRaise ensures the correct window is frontmost within that Space
+      // Terminal-based tools (Claude Code, Gemini CLI, OpenCode) run inside a generic
+      // terminal emulator. `open -b <terminal> <path>` would open a NEW terminal window
+      // at that path instead of focusing the existing one. Skip Phase 1 for these tools
+      // and rely solely on AXRaise to find + raise the correct window.
+      const TERMINAL_SOURCES = new Set(["claude", "gemini", "opencode"]);
+      const isTerminalTool = TERMINAL_SOURCES.has(payload.source ?? "");
+
       const openCmd = `open -b '${escapeShellArg(bundleId)}' '${escapeShellArg(projectPath)}'`;
       const activateScript = [
-        "try",
-        `  do shell script "${escapeAppleScriptString(openCmd)}"`,
-        "  delay 0.3",
-        "end try",
+        // Phase 1: Space switch via open -b (skip for terminal tools — would open new window)
+        ...(isTerminalTool ? [] : [
+          "try",
+          `  do shell script "${escapeAppleScriptString(openCmd)}"`,
+          "  delay 0.3",
+          "end try",
+        ]),
+        // Phase 2: AXRaise to target the correct window
         "try",
         '  tell application "System Events"',
         `    tell (first process whose bundle identifier is "${bundleId}")`,

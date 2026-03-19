@@ -14,6 +14,7 @@ const TOOL_PATHS: Record<ToolName, { label: string; dir: string }> = {
   claude: { label: "Claude Code", dir: ".claude" },
   cursor: { label: "Cursor", dir: ".cursor" },
   gemini: { label: "Gemini CLI", dir: ".gemini" },
+  opencode: { label: "OpenCode", dir: join(".config", "opencode") },
 };
 
 export function detectInstalledTools(): DetectedTool[] {

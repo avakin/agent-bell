@@ -7,6 +7,7 @@ import { loadThemeManifest, getThemeDir, resolveSoundFile } from "../core/theme-
 import { getClaudeHookStatus } from "../hooks/claude.js";
 import { getCursorHookStatus } from "../hooks/cursor.js";
 import { getGeminiHookStatus } from "../hooks/gemini.js";
+import { getOpenCodeHookStatus } from "../hooks/opencode.js";
 import { isPaused } from "../core/state-manager.js";
 import type { BellEvent } from "../types/index.js";
 
@@ -111,6 +112,7 @@ export function doctorCommand(): void {
     { name: "Claude Code", enabled: config.tools.claude.enabled, status: getClaudeHookStatus() },
     { name: "Cursor", enabled: config.tools.cursor.enabled, status: getCursorHookStatus() },
     { name: "Gemini CLI", enabled: config.tools.gemini.enabled, status: getGeminiHookStatus() },
+    { name: "OpenCode", enabled: config.tools.opencode.enabled, status: getOpenCodeHookStatus() },
   ];
 
   for (const tool of toolChecks) {

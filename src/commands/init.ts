@@ -6,6 +6,7 @@ import { playSound } from "../core/audio.js";
 import { installClaudeHooks } from "../hooks/claude.js";
 import { installCursorHooks } from "../hooks/cursor.js";
 import { installGeminiHooks } from "../hooks/gemini.js";
+import { installOpenCodeHooks } from "../hooks/opencode.js";
 import * as desktop from "../core/notifiers/desktop.js";
 import { checkAccessibility, openAccessibilitySettings } from "../utils/accessibility.js";
 import { getPlatform } from "../utils/platform.js";
@@ -261,6 +262,10 @@ export async function initCommand(): Promise<void> {
         enabled: selectedTools.includes("gemini"),
         events: preset,
       },
+      opencode: {
+        enabled: selectedTools.includes("opencode"),
+        events: preset,
+      },
     },
     events: eventConfig,
     notifications: notificationConfig,
@@ -287,6 +292,12 @@ export async function initCommand(): Promise<void> {
   if (config.tools.gemini.enabled) {
     const result = installGeminiHooks();
     log.success("Installed Gemini CLI hooks");
+    if (result.backupPath) backups.push(result.backupPath);
+  }
+
+  if (config.tools.opencode.enabled) {
+    const result = installOpenCodeHooks();
+    log.success("Installed OpenCode plugin");
     if (result.backupPath) backups.push(result.backupPath);
   }
 

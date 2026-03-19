@@ -5,7 +5,7 @@ export type BellEvent =
   | "session-start"
   | "tool-use";
 
-export type ToolName = "claude" | "cursor" | "gemini";
+export type ToolName = "claude" | "cursor" | "gemini" | "opencode";
 
 export type EventPreset = "auto" | "granular";
 
@@ -104,6 +104,7 @@ export const DEFAULT_CONFIG: AgentBellConfig = {
     claude: { enabled: false, events: "auto" },
     cursor: { enabled: false, events: "auto" },
     gemini: { enabled: false, events: "auto" },
+    opencode: { enabled: false, events: "auto" },
   },
   events: {
     "task-complete": true,
@@ -129,4 +130,4 @@ export const BELL_EVENTS: BellEvent[] = [
   "tool-use",
 ];
 
-export const TOOL_NAMES: ToolName[] = ["claude", "cursor", "gemini"];
+export const TOOL_NAMES: ToolName[] = ["claude", "cursor", "gemini", "opencode"];

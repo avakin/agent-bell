@@ -4,6 +4,7 @@ import { getConfigDir } from "../core/config-manager.js";
 import { uninstallClaudeHooks } from "../hooks/claude.js";
 import { uninstallCursorHooks } from "../hooks/cursor.js";
 import { uninstallGeminiHooks } from "../hooks/gemini.js";
+import { uninstallOpenCodeHooks } from "../hooks/opencode.js";
 
 export async function uninstallCommand(options: { removeConfig?: boolean }): Promise<void> {
   log.info("Removing agent-bell hooks...\n");
@@ -16,6 +17,9 @@ export async function uninstallCommand(options: { removeConfig?: boolean }): Pro
 
   uninstallGeminiHooks();
   log.success("Removed Gemini CLI hooks");
+
+  uninstallOpenCodeHooks();
+  log.success("Removed OpenCode plugin");
 
   if (options.removeConfig) {
     const configDir = getConfigDir();

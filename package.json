@@ -1,7 +1,7 @@
 {
   "name": "agent-bell",
   "version": "0.3.0",
-  "description": "Audio notifications for AI coding agents — Claude Code, Cursor, Gemini CLI",
+  "description": "Audio notifications for AI coding agents — Claude Code, Cursor, Gemini CLI, OpenCode",
   "type": "module",
   "bin": {
     "agent-bell": "./dist/index.js"
@@ -21,6 +21,7 @@
     "claude",
     "cursor",
     "gemini",
+    "opencode",
     "hooks"
   ],
   "author": "avakin",

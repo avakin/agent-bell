@@ -10,6 +10,7 @@ export const SOURCE_LABELS: Record<string, string> = {
   claude: "Claude Code",
   cursor: "Cursor",
   gemini: "Gemini CLI",
+  opencode: "OpenCode",
 };
 
 export const EVENT_LABELS: Record<string, string> = {
