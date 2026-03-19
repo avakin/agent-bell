@@ -1,6 +1,6 @@
 {
   "name": "agent-bell",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Audio notifications for AI coding agents — Claude Code, Cursor, Gemini CLI, OpenCode",
   "type": "module",
   "bin": {
