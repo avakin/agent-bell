@@ -1,4 +1,4 @@
-import { spawn, type ChildProcess, type SpawnOptions } from "child_process";
+import { spawn, type ChildProcess, type SpawnOptions } from "node:child_process";
 import { logToFile } from "./logger.js";
 
 export function spawnWithTimeout(
@@ -22,8 +22,8 @@ export function spawnWithTimeout(
   }, timeoutMs);
   timer.unref();
 
-  child.on("error", (err) => {
-    logToFile(`Spawn failed: ${command} ${args.join(" ")}`, err);
+  child.on("error", (error) => {
+    logToFile(`Spawn failed: ${command} ${args.join(" ")}`, error);
   });
 
   child.unref();

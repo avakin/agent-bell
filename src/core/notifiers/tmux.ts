@@ -18,7 +18,7 @@ export function send(payload: NotificationPayload): void {
 
   try {
     spawnWithTimeout("tmux", ["display-message", message]);
-  } catch (err) {
-    logToFile("Failed to send tmux notification", err);
+  } catch (error) {
+    logToFile("Failed to send tmux notification", error);
   }
 }

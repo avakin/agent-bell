@@ -17,7 +17,7 @@ const VALID_EVENTS = new Set<string>([
  * The hot-path command invoked by hooks.
  * Must be fast (<50ms), never throw, never produce stderr, always exit 0.
  */
-export async function playCommand(event: string, source?: string): Promise<void> {
+export function playCommand(event: string, source?: string): void {
   try {
     if (!VALID_EVENTS.has(event)) return;
     if (isPaused()) return;
@@ -54,7 +54,7 @@ export async function playCommand(event: string, source?: string): Promise<void>
     } finally {
       releaseLock();
     }
-  } catch (err) {
-    logToFile("Unhandled error in play command", err);
+  } catch (error) {
+    logToFile("Unhandled error in play command", error);
   }
 }

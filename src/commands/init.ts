@@ -11,7 +11,6 @@ import * as desktop from "../core/notifiers/desktop.js";
 import { checkAccessibility, openAccessibilitySettings } from "../utils/accessibility.js";
 import { getPlatform } from "../utils/platform.js";
 import type { AgentBellConfig, ToolName, BellEvent } from "../types/index.js";
-import { DEFAULT_CONFIG } from "../types/index.js";
 
 export async function initCommand(): Promise<void> {
   // Lazy-load inquirer
@@ -25,8 +24,8 @@ export async function initCommand(): Promise<void> {
   console.log("  Detected AI tools:\n");
   for (const tool of tools) {
     const status = tool.detected ? "\u2714 found" : "\u2716 not found";
-    const color = tool.detected ? "\x1b[32m" : "\x1b[90m";
-    console.log(`  ${color}  ${status}\x1b[0m  ${tool.label}`);
+    const color = tool.detected ? "\u001B[32m" : "\u001B[90m";
+    console.log(`  ${color}  ${status}\u001B[0m  ${tool.label}`);
   }
   console.log();
 

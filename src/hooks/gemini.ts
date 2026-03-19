@@ -1,10 +1,10 @@
-import { existsSync, mkdirSync } from "fs";
-import { homedir } from "os";
-import { join } from "path";
+import { existsSync, mkdirSync } from "node:fs";
+import { homedir } from "node:os";
+import path from "node:path";
 import type { GeminiSettings, GeminiHookRule } from "../types/index.js";
 import { readJsonFile, createBackup, atomicWriteJson } from "./common.js";
 
-const SETTINGS_PATH = join(homedir(), ".gemini", "settings.json");
+const SETTINGS_PATH = path.join(homedir(), ".gemini", "settings.json");
 
 function makeRule(matcher: string, command: string): GeminiHookRule {
   return {
@@ -26,7 +26,7 @@ function getAgentBellHooks(): Record<string, GeminiHookRule[]> {
 }
 
 export function installGeminiHooks(): { backupPath: string | null } {
-  const dir = join(homedir(), ".gemini");
+  const dir = path.join(homedir(), ".gemini");
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 
   const backupPath = createBackup(SETTINGS_PATH);
@@ -37,7 +37,7 @@ export function installGeminiHooks(): { backupPath: string | null } {
 
   // Merge in new hooks
   const newHooks = getAgentBellHooks();
-  if (!cleaned.hooks) cleaned.hooks = {};
+  cleaned.hooks ??= {};
 
   for (const [event, rules] of Object.entries(newHooks)) {
     const existingRules = cleaned.hooks[event] ?? [];
@@ -62,25 +62,22 @@ export function uninstallGeminiHooks(): void {
 function removeGeminiAgentBellHooks(settings: GeminiSettings): GeminiSettings {
   if (!settings.hooks) return settings;
 
-  const cleaned = { ...settings };
-  cleaned.hooks = {};
+  const hooks: Record<string, GeminiHookRule[]> = {};
 
   for (const [event, rules] of Object.entries(settings.hooks)) {
     const filtered = rules.filter((r) => !r._agent_bell);
     if (filtered.length > 0) {
-      cleaned.hooks[event] = filtered;
+      hooks[event] = filtered;
     }
   }
 
-  if (Object.keys(cleaned.hooks).length === 0) {
-    delete cleaned.hooks;
-  }
-
-  return cleaned;
+  return Object.keys(hooks).length === 0
+    ? { ...settings, hooks: undefined }
+    : { ...settings, hooks };
 }
 
 export function isGeminiInstalled(): boolean {
-  return existsSync(join(homedir(), ".gemini"));
+  return existsSync(path.join(homedir(), ".gemini"));
 }
 
 export function getGeminiHookStatus(): { installed: boolean; hooks: string[] } {

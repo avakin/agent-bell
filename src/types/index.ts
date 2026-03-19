@@ -69,11 +69,11 @@ export interface ClaudeSettings {
 }
 
 export interface CursorHooks {
-  hooks?: Array<{
+  hooks?: {
     event: string;
     command: string;
     _agent_bell?: boolean;
-  }>;
+  }[];
   [key: string]: unknown;
 }
 

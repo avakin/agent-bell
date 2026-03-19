@@ -1,9 +1,9 @@
-import { openSync, closeSync, unlinkSync, statSync, constants } from "fs";
-import { join } from "path";
+import { openSync, closeSync, unlinkSync, statSync, constants } from "node:fs";
+import path from "node:path";
 import { getConfigDir, ensureConfigDir } from "./config-manager.js";
 import { logToFile } from "../utils/logger.js";
 
-const LOCK_FILE = join(getConfigDir(), ".lock");
+const LOCK_FILE = path.join(getConfigDir(), ".lock");
 const STALE_THRESHOLD_MS = 10_000;
 
 export function acquireLock(): boolean {
@@ -14,7 +14,7 @@ export function acquireLock(): boolean {
     const stat = statSync(LOCK_FILE);
     const age = Date.now() - stat.mtimeMs;
     if (age > STALE_THRESHOLD_MS) {
-      try { unlinkSync(LOCK_FILE); } catch (err) { logToFile("Failed to remove stale lock", err); }
+      try { unlinkSync(LOCK_FILE); } catch (error) { logToFile("Failed to remove stale lock", error); }
     }
   } catch {
     // No lock file exists — proceed

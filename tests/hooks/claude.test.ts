@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { mkdirSync, rmSync, writeFileSync, readFileSync, readdirSync } from "fs";
-import { join } from "path";
-import { tmpdir } from "os";
-import { randomBytes } from "crypto";
+import { mkdirSync, rmSync, writeFileSync, readFileSync, readdirSync } from "node:fs";
+import path from "node:path";
+import { tmpdir } from "node:os";
+import { randomBytes } from "node:crypto";
 
-const testHome = join(tmpdir(), `agent-bell-test-${randomBytes(4).toString("hex")}`);
-vi.mock("os", async () => {
-  const actual = await vi.importActual<typeof import("os")>("os");
+const testHome = path.join(tmpdir(), `agent-bell-test-${randomBytes(4).toString("hex")}`);
+vi.mock("node:os", async () => {
+  const actual = await vi.importActual<typeof import("node:os")>("os");
   return { ...actual, homedir: () => testHome };
 });
 
@@ -15,8 +15,8 @@ const { installClaudeHooks, uninstallClaudeHooks, getClaudeHookStatus } = await 
 );
 
 describe("claude hooks", () => {
-  const claudeDir = join(testHome, ".claude");
-  const settingsPath = join(claudeDir, "settings.json");
+  const claudeDir = path.join(testHome, ".claude");
+  const settingsPath = path.join(claudeDir, "settings.json");
 
   beforeEach(() => {
     mkdirSync(claudeDir, { recursive: true });
@@ -29,7 +29,7 @@ describe("claude hooks", () => {
   it("installs hooks with correct matcher+hooks format", () => {
     installClaudeHooks();
 
-    const settings = JSON.parse(readFileSync(settingsPath, "utf-8"));
+    const settings = JSON.parse(readFileSync(settingsPath, "utf8"));
     expect(settings.hooks).toBeDefined();
 
     // Stop: one rule with empty matcher
@@ -57,7 +57,7 @@ describe("claude hooks", () => {
 
     installClaudeHooks();
 
-    const settings = JSON.parse(readFileSync(settingsPath, "utf-8"));
+    const settings = JSON.parse(readFileSync(settingsPath, "utf8"));
     expect(settings.permissions.allow).toEqual(["read"]);
     // Existing Stop rule preserved, agent-bell rule added
     expect(settings.hooks.Stop).toHaveLength(2);
@@ -90,7 +90,7 @@ describe("claude hooks", () => {
 
     uninstallClaudeHooks();
 
-    const settings = JSON.parse(readFileSync(settingsPath, "utf-8"));
+    const settings = JSON.parse(readFileSync(settingsPath, "utf8"));
     expect(settings.hooks.Stop).toHaveLength(1);
     expect(settings.hooks.Stop[0].matcher).toBe("Bash");
     expect(settings.hooks.Notification).toBeUndefined();

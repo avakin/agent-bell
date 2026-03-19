@@ -1,13 +1,13 @@
-import { writeFileSync } from "fs";
-import { join, basename } from "path";
-import { tmpdir } from "os";
-import { randomBytes } from "crypto";
+import { writeFileSync } from "node:fs";
+import path from "node:path";
+import { tmpdir } from "node:os";
+import { randomBytes } from "node:crypto";
 import type { NotificationPayload } from "./types.js";
 import { SOURCE_LABELS, EVENT_LABELS } from "./types.js";
 import { spawnWithTimeout } from "../../utils/spawn.js";
 import { logToFile } from "../../utils/logger.js";
 
-const NOTIFIER_PATH = join(
+const NOTIFIER_PATH = path.join(
   import.meta.dirname,
   "..",
   "..",
@@ -38,11 +38,11 @@ const TERMINAL_EMULATOR_BUNDLE_IDS = new Set([
 ]);
 
 function escapeShellArg(s: string): string {
-  return s.replace(/'/g, "'\\''");
+  return s.replaceAll('\'', String.raw`'\''`);
 }
 
 function escapeAppleScriptString(s: string): string {
-  return s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  return s.replaceAll('\\', "\\\\").replaceAll('"', String.raw`\"`);
 }
 
 export function send(payload: NotificationPayload): void {
@@ -55,11 +55,11 @@ export function send(payload: NotificationPayload): void {
     const bundleId = getBundleId();
 
     if (bundleId) {
-      const project = basename(process.cwd());
+      const project = path.basename(process.cwd());
       const projectPath = process.cwd();
 
       // Write the activate AppleScript to a temp file to avoid shell quoting issues
-      const scriptPath = join(tmpdir(), `agent-bell-${randomBytes(4).toString("hex")}.applescript`);
+      const scriptPath = path.join(tmpdir(), `agent-bell-${randomBytes(4).toString("hex")}.applescript`);
       // Phase 1: open -b triggers macOS Space switch
       // For terminal emulators, omit path to avoid opening a new window
       // For IDEs, include path to focus the correct project window
@@ -108,7 +108,7 @@ export function send(payload: NotificationPayload): void {
       const script = `display notification ${JSON.stringify(body)} with title ${JSON.stringify(title)}`;
       spawnWithTimeout("osascript", ["-e", script], undefined, 35_000);
     }
-  } catch (err) {
-    logToFile("Failed to send desktop notification", err);
+  } catch (error) {
+    logToFile("Failed to send desktop notification", error);
   }
 }

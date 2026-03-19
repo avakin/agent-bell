@@ -1,10 +1,10 @@
-import { existsSync, mkdirSync } from "fs";
-import { homedir } from "os";
-import { join } from "path";
+import { existsSync, mkdirSync } from "node:fs";
+import { homedir } from "node:os";
+import path from "node:path";
 import type { ClaudeSettings, ClaudeHookRule } from "../types/index.js";
 import { readJsonFile, createBackup, atomicWriteJson } from "./common.js";
 
-const SETTINGS_PATH = join(homedir(), ".claude", "settings.json");
+const SETTINGS_PATH = path.join(homedir(), ".claude", "settings.json");
 
 function makeRule(matcher: string, command: string): ClaudeHookRule {
   return {
@@ -27,7 +27,7 @@ function getAgentBellHooks(): Record<string, ClaudeHookRule[]> {
 }
 
 export function installClaudeHooks(): { backupPath: string | null } {
-  const dir = join(homedir(), ".claude");
+  const dir = path.join(homedir(), ".claude");
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 
   const backupPath = createBackup(SETTINGS_PATH);
@@ -38,7 +38,7 @@ export function installClaudeHooks(): { backupPath: string | null } {
 
   // Merge in new hooks
   const newHooks = getAgentBellHooks();
-  if (!settings.hooks) settings.hooks = {};
+  settings.hooks ??= {};
 
   for (const [event, rules] of Object.entries(newHooks)) {
     const existingRules = settings.hooks[event] ?? [];
@@ -63,25 +63,22 @@ export function uninstallClaudeHooks(): void {
 function removeAgentBellHooks(settings: ClaudeSettings): ClaudeSettings {
   if (!settings.hooks) return settings;
 
-  const cleaned = { ...settings };
-  cleaned.hooks = {};
+  const hooks: Record<string, ClaudeHookRule[]> = {};
 
   for (const [event, rules] of Object.entries(settings.hooks)) {
     const filtered = rules.filter((r) => !r._agent_bell);
     if (filtered.length > 0) {
-      cleaned.hooks[event] = filtered;
+      hooks[event] = filtered;
     }
   }
 
-  if (Object.keys(cleaned.hooks).length === 0) {
-    delete cleaned.hooks;
-  }
-
-  return cleaned;
+  return Object.keys(hooks).length === 0
+    ? { ...settings, hooks: undefined }
+    : { ...settings, hooks };
 }
 
 export function isClaudeInstalled(): boolean {
-  return existsSync(join(homedir(), ".claude"));
+  return existsSync(path.join(homedir(), ".claude"));
 }
 
 export function getClaudeHookStatus(): { installed: boolean; hooks: string[] } {

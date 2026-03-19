@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { mkdirSync, rmSync, writeFileSync, readFileSync, existsSync, readdirSync } from "fs";
-import { join } from "path";
-import { tmpdir } from "os";
-import { randomBytes } from "crypto";
+import { mkdirSync, rmSync, writeFileSync, readFileSync, existsSync, readdirSync } from "node:fs";
+import path from "node:path";
+import { tmpdir } from "node:os";
+import { randomBytes } from "node:crypto";
 
-const testHome = join(tmpdir(), `agent-bell-test-opencode-${randomBytes(4).toString("hex")}`);
-vi.mock("os", async () => {
-  const actual = await vi.importActual<typeof import("os")>("os");
+const testHome = path.join(tmpdir(), `agent-bell-test-opencode-${randomBytes(4).toString("hex")}`);
+vi.mock("node:os", async () => {
+  const actual = await vi.importActual<typeof import("node:os")>("os");
   return { ...actual, homedir: () => testHome };
 });
 
@@ -15,11 +15,11 @@ const { installOpenCodeHooks, uninstallOpenCodeHooks, getOpenCodeHookStatus } = 
 );
 
 describe("opencode hooks", () => {
-  const pluginDir = join(testHome, ".config", "opencode", "plugins");
-  const pluginPath = join(pluginDir, "agent-bell.ts");
+  const pluginDir = path.join(testHome, ".config", "opencode", "plugins");
+  const pluginPath = path.join(pluginDir, "agent-bell.ts");
 
   beforeEach(() => {
-    mkdirSync(join(testHome, ".config", "opencode"), { recursive: true });
+    mkdirSync(path.join(testHome, ".config", "opencode"), { recursive: true });
   });
 
   afterEach(() => {
@@ -30,7 +30,7 @@ describe("opencode hooks", () => {
     installOpenCodeHooks();
 
     expect(existsSync(pluginPath)).toBe(true);
-    const content = readFileSync(pluginPath, "utf-8");
+    const content = readFileSync(pluginPath, "utf8");
     expect(content).toMatch(/^\/\/ @agent-bell-managed/);
     expect(content).toContain('case "session.idle"');
     expect(content).toContain('case "session.created"');
@@ -79,7 +79,7 @@ describe("opencode hooks", () => {
     uninstallOpenCodeHooks();
 
     expect(existsSync(pluginPath)).toBe(true);
-    expect(readFileSync(pluginPath, "utf-8")).toContain("user's own plugin");
+    expect(readFileSync(pluginPath, "utf8")).toContain("user's own plugin");
   });
 
   it("reports hook status correctly", () => {

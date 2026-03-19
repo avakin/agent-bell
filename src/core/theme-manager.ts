@@ -1,29 +1,29 @@
-import { existsSync, readFileSync, readdirSync, mkdirSync, cpSync } from "fs";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
-import { homedir } from "os";
+import { existsSync, readFileSync, readdirSync, mkdirSync, cpSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { homedir } from "node:os";
 import type { BellEvent, ThemeManifest } from "../types/index.js";
 import { logToFile } from "../utils/logger.js";
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = path.dirname(__filename);
 
 function getUserThemesDir(): string {
-  return join(homedir(), ".agent-bell", "themes");
+  return path.join(homedir(), ".agent-bell", "themes");
 }
 
 function getBundledThemesDir(): string {
   // From dist/core/theme-manager.js → ../../assets/themes
-  return join(__dirname, "..", "..", "assets", "themes");
+  return path.join(__dirname, "..", "..", "assets", "themes");
 }
 
 export function getThemeDir(themeName: string): string | null {
   // Check user themes first
-  const userDir = join(getUserThemesDir(), themeName);
+  const userDir = path.join(getUserThemesDir(), themeName);
   if (existsSync(userDir)) return userDir;
 
   // Then bundled themes
-  const bundledDir = join(getBundledThemesDir(), themeName);
+  const bundledDir = path.join(getBundledThemesDir(), themeName);
   if (existsSync(bundledDir)) return bundledDir;
 
   return null;
@@ -33,13 +33,13 @@ export function loadThemeManifest(themeName: string): ThemeManifest | null {
   const dir = getThemeDir(themeName);
   if (!dir) return null;
 
-  const manifestPath = join(dir, "theme.json");
+  const manifestPath = path.join(dir, "theme.json");
   if (!existsSync(manifestPath)) return null;
 
   try {
-    return JSON.parse(readFileSync(manifestPath, "utf-8")) as ThemeManifest;
-  } catch (err) {
-    logToFile("Failed to parse theme manifest", err);
+    return JSON.parse(readFileSync(manifestPath, "utf8")) as ThemeManifest;
+  } catch (error) {
+    logToFile("Failed to parse theme manifest", error);
     return null;
   }
 }
@@ -60,7 +60,7 @@ export function resolveSoundFile(
     const escalatedKey = `${event}-escalated` as keyof ThemeManifest["sounds"];
     const escalatedFile = manifest.sounds[escalatedKey];
     if (escalatedFile) {
-      const fullPath = join(dir, escalatedFile);
+      const fullPath = path.join(dir, escalatedFile);
       if (existsSync(fullPath)) return fullPath;
     }
   }
@@ -68,7 +68,7 @@ export function resolveSoundFile(
   // Fall back to normal variant
   const normalFile = manifest.sounds[event];
   if (normalFile) {
-    const fullPath = join(dir, normalFile);
+    const fullPath = path.join(dir, normalFile);
     if (existsSync(fullPath)) return fullPath;
   }
 
@@ -112,7 +112,7 @@ export function listThemes(): { name: string; manifest: ThemeManifest | null; so
 }
 
 export function installTheme(sourcePath: string, themeName: string): void {
-  const dest = join(getUserThemesDir(), themeName);
+  const dest = path.join(getUserThemesDir(), themeName);
   mkdirSync(dest, { recursive: true });
   cpSync(sourcePath, dest, { recursive: true });
 }

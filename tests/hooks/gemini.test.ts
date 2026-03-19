@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { mkdirSync, rmSync, writeFileSync, readFileSync, readdirSync } from "fs";
-import { join } from "path";
-import { tmpdir } from "os";
-import { randomBytes } from "crypto";
+import { mkdirSync, rmSync, writeFileSync, readFileSync, readdirSync } from "node:fs";
+import path from "node:path";
+import { tmpdir } from "node:os";
+import { randomBytes } from "node:crypto";
 
-const testHome = join(tmpdir(), `agent-bell-test-gemini-${randomBytes(4).toString("hex")}`);
-vi.mock("os", async () => {
-  const actual = await vi.importActual<typeof import("os")>("os");
+const testHome = path.join(tmpdir(), `agent-bell-test-gemini-${randomBytes(4).toString("hex")}`);
+vi.mock("node:os", async () => {
+  const actual = await vi.importActual<typeof import("node:os")>("os");
   return { ...actual, homedir: () => testHome };
 });
 
@@ -15,8 +15,8 @@ const { installGeminiHooks, uninstallGeminiHooks, getGeminiHookStatus } = await 
 );
 
 describe("gemini hooks", () => {
-  const geminiDir = join(testHome, ".gemini");
-  const settingsPath = join(geminiDir, "settings.json");
+  const geminiDir = path.join(testHome, ".gemini");
+  const settingsPath = path.join(geminiDir, "settings.json");
 
   beforeEach(() => {
     mkdirSync(geminiDir, { recursive: true });
@@ -29,7 +29,7 @@ describe("gemini hooks", () => {
   it("installs hooks with correct matcher+hooks format", () => {
     installGeminiHooks();
 
-    const settings = JSON.parse(readFileSync(settingsPath, "utf-8"));
+    const settings = JSON.parse(readFileSync(settingsPath, "utf8"));
     expect(settings.hooks).toBeDefined();
 
     // AfterAgent: one rule with empty matcher
@@ -56,7 +56,7 @@ describe("gemini hooks", () => {
 
     installGeminiHooks();
 
-    const settings = JSON.parse(readFileSync(settingsPath, "utf-8"));
+    const settings = JSON.parse(readFileSync(settingsPath, "utf8"));
     expect(settings.customSetting).toBe("value");
     // Existing AfterAgent rule preserved, agent-bell rule added
     expect(settings.hooks.AfterAgent).toHaveLength(2);
@@ -91,7 +91,7 @@ describe("gemini hooks", () => {
 
     uninstallGeminiHooks();
 
-    const settings = JSON.parse(readFileSync(settingsPath, "utf-8"));
+    const settings = JSON.parse(readFileSync(settingsPath, "utf8"));
     expect(settings.hooks.AfterAgent).toHaveLength(1);
     expect(settings.hooks.AfterAgent[0].matcher).toBe("*.py");
     // Notification should be removed entirely (no non-agent-bell hooks)

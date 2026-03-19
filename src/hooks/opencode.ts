@@ -1,10 +1,10 @@
-import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from "fs";
-import { homedir } from "os";
-import { join } from "path";
+import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
+import { homedir } from "node:os";
+import path from "node:path";
 import { createBackup } from "./common.js";
 
-const PLUGIN_DIR = join(homedir(), ".config", "opencode", "plugins");
-const PLUGIN_PATH = join(PLUGIN_DIR, "agent-bell.ts");
+const PLUGIN_DIR = path.join(homedir(), ".config", "opencode", "plugins");
+const PLUGIN_PATH = path.join(PLUGIN_DIR, "agent-bell.ts");
 const MARKER = "// @agent-bell-managed";
 
 function generatePluginContent(): string {
@@ -48,7 +48,7 @@ export function installOpenCodeHooks(): { backupPath: string | null } {
   mkdirSync(PLUGIN_DIR, { recursive: true });
 
   const backupPath = createBackup(PLUGIN_PATH);
-  writeFileSync(PLUGIN_PATH, generatePluginContent(), "utf-8");
+  writeFileSync(PLUGIN_PATH, generatePluginContent(), "utf8");
 
   return { backupPath };
 }
@@ -56,7 +56,7 @@ export function installOpenCodeHooks(): { backupPath: string | null } {
 export function uninstallOpenCodeHooks(): void {
   if (!existsSync(PLUGIN_PATH)) return;
 
-  const content = readFileSync(PLUGIN_PATH, "utf-8");
+  const content = readFileSync(PLUGIN_PATH, "utf8");
   if (!content.startsWith(MARKER)) return;
 
   createBackup(PLUGIN_PATH);
@@ -64,13 +64,13 @@ export function uninstallOpenCodeHooks(): void {
 }
 
 export function isOpenCodeInstalled(): boolean {
-  return existsSync(join(homedir(), ".config", "opencode"));
+  return existsSync(path.join(homedir(), ".config", "opencode"));
 }
 
 export function getOpenCodeHookStatus(): { installed: boolean; hooks: string[] } {
   if (!existsSync(PLUGIN_PATH)) return { installed: false, hooks: [] };
 
-  const content = readFileSync(PLUGIN_PATH, "utf-8");
+  const content = readFileSync(PLUGIN_PATH, "utf8");
   if (!content.startsWith(MARKER)) return { installed: false, hooks: [] };
 
   const hooks: string[] = [];

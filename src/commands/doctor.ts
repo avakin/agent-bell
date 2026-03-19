@@ -1,5 +1,5 @@
-import { existsSync, readFileSync } from "fs";
-import { join } from "path";
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
 import chalk from "chalk";
 import { loadConfig, getConfigDir, getConfigPath } from "../core/config-manager.js";
 import { getAudioPlayer } from "../utils/platform.js";
@@ -30,7 +30,7 @@ export function doctorCommand(): void {
   let issues = 0;
 
   // 1. Node.js version
-  const nodeVersion = parseInt(process.versions.node.split(".")[0], 10);
+  const nodeVersion = Number.parseInt(process.versions.node.split(".")[0], 10);
   if (nodeVersion >= 18) {
     pass(`Node.js ${process.versions.node}`);
     passed++;
@@ -53,7 +53,7 @@ export function doctorCommand(): void {
   const configPath = getConfigPath();
   if (existsSync(configPath)) {
     try {
-      JSON.parse(readFileSync(configPath, "utf-8"));
+      JSON.parse(readFileSync(configPath, "utf8"));
       pass("Config file valid");
       passed++;
     } catch {
@@ -134,9 +134,9 @@ export function doctorCommand(): void {
   }
 
   // 8. Recent errors
-  const errorLog = join(getConfigDir(), "error.log");
+  const errorLog = path.join(getConfigDir(), "error.log");
   if (existsSync(errorLog)) {
-    const content = readFileSync(errorLog, "utf-8").trim();
+    const content = readFileSync(errorLog, "utf8").trim();
     if (content) {
       const lines = content.split("\n");
       const last5 = lines.slice(-5);

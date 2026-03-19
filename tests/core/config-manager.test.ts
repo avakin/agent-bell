@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { mkdirSync, rmSync, existsSync, readFileSync } from "fs";
-import { join } from "path";
-import { tmpdir } from "os";
-import { randomBytes } from "crypto";
+import { mkdirSync, rmSync, existsSync } from "node:fs";
+import path from "node:path";
+import { tmpdir } from "node:os";
+import { randomBytes } from "node:crypto";
 
 // Mock homedir to use temp directory
-const testHome = join(tmpdir(), `agent-bell-test-${randomBytes(4).toString("hex")}`);
-vi.mock("os", async () => {
-  const actual = await vi.importActual<typeof import("os")>("os");
+const testHome = path.join(tmpdir(), `agent-bell-test-${randomBytes(4).toString("hex")}`);
+vi.mock("node:os", async () => {
+  const actual = await vi.importActual<typeof import("node:os")>("os");
   return { ...actual, homedir: () => testHome };
 });
 
