@@ -18,18 +18,6 @@ agent-bell plays sound notifications when your AI coding agent completes a task,
 - Per-tool cooldowns to prevent notification spam
 - Zero config needed — `npx agent-bell init` walks you through everything
 
-## Installation
-
-```bash
-npm install -g agent-bell
-```
-
-Or run directly without installing:
-
-```bash
-npx agent-bell init
-```
-
 ## Quick Start
 
 ```bash
@@ -42,6 +30,12 @@ The interactive wizard will:
 2. Let you pick events, notification methods, and a sound theme
 3. Install hooks automatically — you're done
 
+Or install globally: `npm install -g agent-bell`
+
+To update: `npm update -g agent-bell` (or `npx agent-bell@latest init` if using npx).
+
+After updating, run `agent-bell doctor` to verify your setup. If you've customized hooks, re-run `agent-bell init` to pick up any new events or hook format changes.
+
 ## Supported Tools
 
 | Tool            | Hook mechanism                                                                  |
@@ -52,6 +46,16 @@ The interactive wizard will:
 | **OpenCode**    | Writes to OpenCode's config with event-based plugin                             |
 
 Hooks call `agent-bell play <event> --source <tool>`, which is a fast-path command that skips loading the full CLI framework.
+
+## Events
+
+| Event           | Description                                               | Default |
+| --------------- | --------------------------------------------------------- | ------- |
+| `task-complete` | Agent finished its task                                   | On      |
+| `needs-input`   | Agent is waiting for your input (permission prompt, idle) | On      |
+| `error`         | Agent encountered an error                                | On      |
+| `session-start` | New agent session started                                 | Off     |
+| `tool-use`      | Agent invoked a tool                                      | Off     |
 
 ## Notification Methods
 
@@ -85,67 +89,7 @@ Add your own theme from a directory containing a `theme.json` manifest and `.wav
 agent-bell themes add ./my-theme
 ```
 
-## Creating Custom Themes
-
-You can create your own theme and install it alongside the bundled ones.
-
-### Directory Structure
-
-Create a folder with a `theme.json` manifest and `.wav` sound files:
-
-```
-my-theme/
-  theme.json
-  task-complete.wav
-  task-complete-escalated.wav
-  needs-input.wav
-  needs-input-escalated.wav
-  error.wav
-```
-
-### Manifest Format
-
-`theme.json`:
-
-```json
-{
-  "name": "my-theme",
-  "description": "Short description",
-  "author": "your-name",
-  "sounds": {
-    "task-complete": "task-complete.wav",
-    "task-complete-escalated": "task-complete-escalated.wav",
-    "needs-input": "needs-input.wav",
-    "needs-input-escalated": "needs-input-escalated.wav",
-    "error": "error.wav"
-  }
-}
-```
-
-### Sound Events
-
-The `sounds` object maps event names to `.wav` files. All files must be WAV format.
-
-| Key                       | When it plays                          |
-| ------------------------- | -------------------------------------- |
-| `task-complete`           | Agent finished its task                |
-| `task-complete-escalated` | Escalated variant (louder/more urgent) |
-| `needs-input`             | Agent needs your input                 |
-| `needs-input-escalated`   | Escalated variant                      |
-| `error`                   | Agent hit an error                     |
-| `session-start`           | New session started                    |
-| `tool-use`                | Agent invoked a tool                   |
-
-Each event can also have an `-escalated` variant. If the escalated variant is missing, the normal sound plays instead.
-
-### Install and Activate
-
-```bash
-agent-bell themes add ./my-theme
-agent-bell config set theme my-theme
-```
-
-User themes are stored in `~/.agent-bell/themes/` and take priority over bundled themes with the same name.
+Want to create your own? See [Creating Custom Themes](docs/custom-themes.md).
 
 ## Smart Features
 
@@ -157,7 +101,7 @@ Prevents notification spam. Default: **3 seconds** between notifications per too
 
 If you don't respond within **30 seconds** (configurable), the next notification plays an escalated sound variant — louder and more attention-grabbing. This resets once you interact with the tool.
 
-## Configuration
+## Configuration & CLI
 
 Config is stored at `~/.agent-bell/config.json`. Manage it with the CLI:
 
@@ -170,8 +114,6 @@ agent-bell config set notifications.say true
 ```
 
 Dotted keys are supported for nested values (e.g., `notifications.desktop`, `tools.claude.enabled`).
-
-## CLI Reference
 
 | Command                               | Description                                                          |
 | ------------------------------------- | -------------------------------------------------------------------- |
@@ -189,15 +131,60 @@ Dotted keys are supported for nested values (e.g., `notifications.desktop`, `too
 | `agent-bell doctor`                   | Diagnose common issues with your setup                               |
 | `agent-bell uninstall`                | Remove all hooks (`--remove-config` to also delete `~/.agent-bell/`) |
 
-## Events
+## Tips
 
-| Event           | Description                                               | Default |
-| --------------- | --------------------------------------------------------- | ------- |
-| `task-complete` | Agent finished its task                                   | On      |
-| `needs-input`   | Agent is waiting for your input (permission prompt, idle) | On      |
-| `error`         | Agent encountered an error                                | On      |
-| `session-start` | New agent session started                                 | Off     |
-| `tool-use`      | Agent invoked a tool                                      | Off     |
+### Reduce noise with agent permissions
+
+Every Claude Code permission prompt fires a `needs-input` notification. Grant your agent basic read-only permissions to eliminate those prompts. Add the following to `~/.claude/settings.json`:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)", "Bash(find:*)", "Bash(grep:*)",
+      "Bash(head:*)", "Bash(tail:*)", "Bash(wc:*)", "Bash(ls:*)",
+      "Bash(gh api:*)", "Bash(gh pr view:*)", "Bash(gh pr list:*)",
+      "Bash(gh pr checks:*)", "Bash(gh pr diff:*)", "Bash(gh repo view:*)",
+      "Bash(gh run view:*)", "Bash(gh run list:*)",
+      "Bash(gh issue view:*)", "Bash(gh issue list:*)",
+      "Bash(gh workflow list:*)", "Bash(gh workflow view:*)"
+    ]
+  }
+}
+```
+
+The same principle applies to other tools — the more you pre-grant, the fewer interruptions.
+
+### Tune cooldown for your workflow
+
+If your agent invokes many tools in quick succession, increase the cooldown to avoid rapid-fire notifications:
+
+```bash
+agent-bell config set cooldown 10
+```
+
+## FAQ
+
+**How do I update?**
+`npm update -g agent-bell` or `npx agent-bell@latest init`. Run `agent-bell doctor` after.
+
+**Too many `needs-input` notifications?**
+Grant your agent read-only permissions to reduce permission prompts. See [Tips](#reduce-noise-with-agent-permissions).
+
+**Can I use it without a global install?**
+Yes — `npx agent-bell init` works without installing globally.
+
+**How do I temporarily silence notifications?**
+`agent-bell pause` to silence, `agent-bell resume` to bring them back.
+
+**Notifications not playing?**
+Run `agent-bell doctor` and `agent-bell test`. Check your hooks with `agent-bell status`.
+
+**Does it work on Linux?**
+Sound and desktop notifications work. TTS needs `espeak` or similar.
+
+**Different settings per tool?**
+Not yet — on the roadmap. All tools share one config.
 
 ## How It Works
 
