@@ -1,13 +1,13 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync, renameSync } from "fs";
-import { homedir } from "os";
-import { join, dirname } from "path";
-import { randomBytes } from "crypto";
-import { AgentBellConfig, DEFAULT_CONFIG } from "../types/index.js";
+import { existsSync, mkdirSync, readFileSync, writeFileSync, renameSync } from "node:fs";
+import { homedir } from "node:os";
+import path from "node:path";
+import { randomBytes } from "node:crypto";
+import { type AgentBellConfig, DEFAULT_CONFIG } from "../types/index.js";
 import { deepMerge } from "../hooks/common.js";
 import { logToFile } from "../utils/logger.js";
 
-const CONFIG_DIR = join(homedir(), ".agent-bell");
-const CONFIG_FILE = join(CONFIG_DIR, "config.json");
+const CONFIG_DIR = path.join(homedir(), ".agent-bell");
+const CONFIG_FILE = path.join(CONFIG_DIR, "config.json");
 
 export function getConfigDir(): string {
   return CONFIG_DIR;
@@ -29,14 +29,14 @@ export function loadConfig(): AgentBellConfig {
     return { ...DEFAULT_CONFIG };
   }
   try {
-    const raw = readFileSync(CONFIG_FILE, "utf-8");
+    const raw = readFileSync(CONFIG_FILE, "utf8");
     const parsed = JSON.parse(raw) as Partial<AgentBellConfig>;
     return deepMerge(
       DEFAULT_CONFIG as unknown as Record<string, unknown>,
       parsed as unknown as Record<string, unknown>,
     ) as unknown as AgentBellConfig;
-  } catch (err) {
-    logToFile("Failed to parse config, using defaults", err);
+  } catch (error) {
+    logToFile("Failed to parse config, using defaults", error);
     return { ...DEFAULT_CONFIG };
   }
 }
@@ -57,8 +57,8 @@ export function updateConfig(updates: Partial<AgentBellConfig>): AgentBellConfig
 }
 
 function atomicWrite(filePath: string, content: string): void {
-  const dir = dirname(filePath);
-  const tmpFile = join(dir, `.tmp-${randomBytes(6).toString("hex")}`);
-  writeFileSync(tmpFile, content, "utf-8");
+  const dir = path.dirname(filePath);
+  const tmpFile = path.join(dir, `.tmp-${randomBytes(6).toString("hex")}`);
+  writeFileSync(tmpFile, content, "utf8");
   renameSync(tmpFile, filePath);
 }

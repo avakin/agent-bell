@@ -1,4 +1,4 @@
-import { platform } from "os";
+import { platform } from "node:os";
 import type { NotificationPayload } from "./types.js";
 import { SOURCE_LABELS, EVENT_LABELS } from "./types.js";
 import { spawnWithTimeout } from "../../utils/spawn.js";
@@ -19,7 +19,7 @@ export function send(payload: NotificationPayload): void {
 
   try {
     spawnWithTimeout("say", [message]);
-  } catch (err) {
-    logToFile("Failed to send say notification", err);
+  } catch (error) {
+    logToFile("Failed to send say notification", error);
   }
 }

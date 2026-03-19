@@ -1,5 +1,5 @@
-import { platform } from "os";
-import { execFileSync } from "child_process";
+import { platform } from "node:os";
+import { execFileSync } from "node:child_process";
 
 export type SupportedPlatform = "darwin" | "linux";
 
@@ -24,7 +24,7 @@ export function getAudioPlayer(): { command: string; volumeArgs: (vol: number) =
     execFileSync("which", ["paplay"], { stdio: "ignore" });
     return {
       command: "paplay",
-      volumeArgs: (vol: number) => [`--volume=${Math.round(vol * 65536)}`],
+      volumeArgs: (vol: number) => [`--volume=${Math.round(vol * 65_536)}`],
     };
   } catch {
     return {

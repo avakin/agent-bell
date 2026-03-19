@@ -10,22 +10,25 @@ export function configShowCommand(): void {
 
 function validateConfigValue(key: string, value: unknown): string | null {
   switch (key) {
-    case "volume":
+    case "volume": {
       if (typeof value === "number" && (value < 0 || value > 1)) {
         return "Volume must be between 0 and 1";
       }
       break;
-    case "cooldown":
+    }
+    case "cooldown": {
       if (typeof value === "number" && value < 0) {
         return "Cooldown must be >= 0";
       }
       break;
-    case "escalation_delay":
+    }
+    case "escalation_delay": {
       if (typeof value === "number" && value < 0) {
         return "Escalation delay must be >= 0";
       }
       break;
-    case "theme":
+    }
+    case "theme": {
       if (typeof value === "string") {
         const themes = listThemes();
         if (!themes.some((t) => t.name === value)) {
@@ -33,14 +36,13 @@ function validateConfigValue(key: string, value: unknown): string | null {
         }
       }
       break;
+    }
   }
 
   // Check for tools.*.events
-  if (key === "events" || key.endsWith(".events")) {
-    if (typeof value === "string" && value !== "auto" && value !== "granular") {
+  if ((key === "events" || key.endsWith(".events")) && typeof value === "string" && value !== "auto" && value !== "granular") {
       return "Events preset must be 'auto' or 'granular'";
     }
-  }
 
   return null;
 }
@@ -61,14 +63,14 @@ export function configSetCommand(key: string, value: string): void {
     target = target[part] as Record<string, unknown>;
   }
 
-  const lastKey = parts[parts.length - 1];
-  if (!(lastKey in target)) {
+  const lastKey = parts.at(-1);
+  if (!lastKey || !(lastKey in target)) {
     log.error(`Unknown config key: ${key}`);
     return;
   }
 
   // Type coercion
-  const existing = target[lastKey];
+  const existing: unknown = target[lastKey];
   let coerced: unknown;
   if (typeof existing === "number") {
     coerced = Number(value);

@@ -4,6 +4,7 @@ import { loadThemeManifest } from "../core/theme-manager.js";
 import { getClaudeHookStatus } from "../hooks/claude.js";
 import { getCursorHookStatus } from "../hooks/cursor.js";
 import { getGeminiHookStatus } from "../hooks/gemini.js";
+import { getOpenCodeHookStatus } from "../hooks/opencode.js";
 import { isPaused } from "../core/state-manager.js";
 import { log } from "../utils/logger.js";
 import { checkAccessibility } from "../utils/accessibility.js";
@@ -42,6 +43,7 @@ export function statusCommand(): void {
     { name: "Claude Code", config: config.tools.claude, status: getClaudeHookStatus() },
     { name: "Cursor", config: config.tools.cursor, status: getCursorHookStatus() },
     { name: "Gemini CLI", config: config.tools.gemini, status: getGeminiHookStatus() },
+    { name: "OpenCode", config: config.tools.opencode, status: getOpenCodeHookStatus() },
   ];
 
   for (const tool of hookStatuses) {

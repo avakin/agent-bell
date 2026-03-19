@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { mkdirSync, rmSync, writeFileSync, readFileSync, readdirSync } from "fs";
-import { join } from "path";
-import { tmpdir } from "os";
-import { randomBytes } from "crypto";
+import { mkdirSync, rmSync, writeFileSync, readFileSync, readdirSync } from "node:fs";
+import path from "node:path";
+import { tmpdir } from "node:os";
+import { randomBytes } from "node:crypto";
 
-const testHome = join(tmpdir(), `agent-bell-test-cursor-${randomBytes(4).toString("hex")}`);
-vi.mock("os", async () => {
-  const actual = await vi.importActual<typeof import("os")>("os");
+const testHome = path.join(tmpdir(), `agent-bell-test-cursor-${randomBytes(4).toString("hex")}`);
+vi.mock("node:os", async () => {
+  const actual = await vi.importActual<typeof import("node:os")>("os");
   return { ...actual, homedir: () => testHome };
 });
 
@@ -15,8 +15,8 @@ const { installCursorHooks, uninstallCursorHooks, getCursorHookStatus } = await 
 );
 
 describe("cursor hooks", () => {
-  const cursorDir = join(testHome, ".cursor");
-  const hooksPath = join(cursorDir, "hooks.json");
+  const cursorDir = path.join(testHome, ".cursor");
+  const hooksPath = path.join(cursorDir, "hooks.json");
 
   beforeEach(() => {
     mkdirSync(cursorDir, { recursive: true });
@@ -29,7 +29,7 @@ describe("cursor hooks", () => {
   it("installs hooks with correct flat array format", () => {
     installCursorHooks();
 
-    const settings = JSON.parse(readFileSync(hooksPath, "utf-8"));
+    const settings = JSON.parse(readFileSync(hooksPath, "utf8"));
     expect(settings.hooks).toBeDefined();
     expect(Array.isArray(settings.hooks)).toBe(true);
 
@@ -48,7 +48,7 @@ describe("cursor hooks", () => {
 
     installCursorHooks();
 
-    const settings = JSON.parse(readFileSync(hooksPath, "utf-8"));
+    const settings = JSON.parse(readFileSync(hooksPath, "utf8"));
     expect(settings.otherSetting).toBe(true);
     // Existing hook preserved, agent-bell hook added
     expect(settings.hooks).toHaveLength(2);
@@ -76,7 +76,7 @@ describe("cursor hooks", () => {
 
     uninstallCursorHooks();
 
-    const settings = JSON.parse(readFileSync(hooksPath, "utf-8"));
+    const settings = JSON.parse(readFileSync(hooksPath, "utf8"));
     expect(settings.hooks).toHaveLength(1);
     expect(settings.hooks[0].command).toBe("my-custom-script");
   });

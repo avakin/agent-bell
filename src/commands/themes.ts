@@ -2,7 +2,7 @@ import { log } from "../utils/logger.js";
 import { listThemes, resolveSoundFile, installTheme, loadThemeManifest } from "../core/theme-manager.js";
 import { playSound } from "../core/audio.js";
 import { loadConfig } from "../core/config-manager.js";
-import { existsSync } from "fs";
+import { existsSync } from "node:fs";
 import type { BellEvent } from "../types/index.js";
 
 export function themesListCommand(): void {
@@ -54,7 +54,7 @@ export function themesAddCommand(sourcePath: string): void {
   }
 
   // Derive theme name from directory name
-  const themeName = sourcePath.split("/").pop()!;
+  const themeName = sourcePath.split("/").at(-1) ?? sourcePath;
 
   installTheme(sourcePath, themeName);
   log.success(`Theme "${themeName}" installed.`);

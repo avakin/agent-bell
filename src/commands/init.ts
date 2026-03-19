@@ -6,11 +6,11 @@ import { playSound } from "../core/audio.js";
 import { installClaudeHooks } from "../hooks/claude.js";
 import { installCursorHooks } from "../hooks/cursor.js";
 import { installGeminiHooks } from "../hooks/gemini.js";
+import { installOpenCodeHooks } from "../hooks/opencode.js";
 import * as desktop from "../core/notifiers/desktop.js";
 import { checkAccessibility, openAccessibilitySettings } from "../utils/accessibility.js";
 import { getPlatform } from "../utils/platform.js";
 import type { AgentBellConfig, ToolName, BellEvent } from "../types/index.js";
-import { DEFAULT_CONFIG } from "../types/index.js";
 
 export async function initCommand(): Promise<void> {
   // Lazy-load inquirer
@@ -24,8 +24,8 @@ export async function initCommand(): Promise<void> {
   console.log("  Detected AI tools:\n");
   for (const tool of tools) {
     const status = tool.detected ? "\u2714 found" : "\u2716 not found";
-    const color = tool.detected ? "\x1b[32m" : "\x1b[90m";
-    console.log(`  ${color}  ${status}\x1b[0m  ${tool.label}`);
+    const color = tool.detected ? "\u001B[32m" : "\u001B[90m";
+    console.log(`  ${color}  ${status}\u001B[0m  ${tool.label}`);
   }
   console.log();
 
@@ -261,6 +261,10 @@ export async function initCommand(): Promise<void> {
         enabled: selectedTools.includes("gemini"),
         events: preset,
       },
+      opencode: {
+        enabled: selectedTools.includes("opencode"),
+        events: preset,
+      },
     },
     events: eventConfig,
     notifications: notificationConfig,
@@ -287,6 +291,12 @@ export async function initCommand(): Promise<void> {
   if (config.tools.gemini.enabled) {
     const result = installGeminiHooks();
     log.success("Installed Gemini CLI hooks");
+    if (result.backupPath) backups.push(result.backupPath);
+  }
+
+  if (config.tools.opencode.enabled) {
+    const result = installOpenCodeHooks();
+    log.success("Installed OpenCode plugin");
     if (result.backupPath) backups.push(result.backupPath);
   }
 

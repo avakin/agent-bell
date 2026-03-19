@@ -1,10 +1,10 @@
-import { existsSync, mkdirSync } from "fs";
-import { homedir } from "os";
-import { join } from "path";
+import { existsSync, mkdirSync } from "node:fs";
+import { homedir } from "node:os";
+import path from "node:path";
 import type { CursorHooks } from "../types/index.js";
 import { readJsonFile, createBackup, atomicWriteJson } from "./common.js";
 
-const HOOKS_PATH = join(homedir(), ".cursor", "hooks.json");
+const HOOKS_PATH = path.join(homedir(), ".cursor", "hooks.json");
 
 function getAgentBellHooks(): CursorHooks["hooks"] {
   return [
@@ -17,7 +17,7 @@ function getAgentBellHooks(): CursorHooks["hooks"] {
 }
 
 export function installCursorHooks(): { backupPath: string | null } {
-  const dir = join(homedir(), ".cursor");
+  const dir = path.join(homedir(), ".cursor");
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 
   const backupPath = createBackup(HOOKS_PATH);
@@ -27,8 +27,8 @@ export function installCursorHooks(): { backupPath: string | null } {
   const cleaned = removeCursorAgentBellHooks(existing);
 
   // Merge in new hooks
-  const newHooks = getAgentBellHooks()!;
-  cleaned.hooks = [...(cleaned.hooks ?? []), ...newHooks];
+  const newHooks = getAgentBellHooks();
+  cleaned.hooks = [...(cleaned.hooks ?? []), ...(newHooks ?? [])];
 
   atomicWriteJson(HOOKS_PATH, cleaned);
   return { backupPath };
@@ -48,15 +48,14 @@ export function uninstallCursorHooks(): void {
 function removeCursorAgentBellHooks(settings: CursorHooks): CursorHooks {
   if (!settings.hooks) return settings;
 
-  const cleaned = { ...settings };
-  cleaned.hooks = settings.hooks.filter((h) => !h._agent_bell);
-  if (cleaned.hooks.length === 0) delete cleaned.hooks;
-
-  return cleaned;
+  const filteredHooks = settings.hooks.filter((h) => !h._agent_bell);
+  return filteredHooks.length === 0
+    ? { ...settings, hooks: undefined }
+    : { ...settings, hooks: filteredHooks };
 }
 
 export function isCursorInstalled(): boolean {
-  return existsSync(join(homedir(), ".cursor"));
+  return existsSync(path.join(homedir(), ".cursor"));
 }
 
 export function getCursorHookStatus(): { installed: boolean; hooks: string[] } {

@@ -8,7 +8,7 @@ export function sendSound(config: AgentBellConfig, payload: NotificationPayload)
   if (!soundFile) return;
 
   const volume = payload.escalated
-    ? Math.min(config.volume * 1.5, 1.0)
+    ? Math.min(config.volume * 1.5, 1)
     : config.volume;
   playSound(soundFile, volume);
 }

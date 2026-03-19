@@ -10,7 +10,7 @@ if (args[0] === "play" && args[1]) {
     source = args[sourceIdx + 1];
   }
   const { playCommand } = await import("./commands/play.js");
-  await playCommand(event, source);
+  playCommand(event, source);
   process.exit(0);
 }
 
@@ -39,7 +39,7 @@ program
   .option("--source <tool>", "Source tool for per-tool cooldown tracking")
   .action(async (event: string, options: { source?: string }) => {
     const { playCommand } = await import("./commands/play.js");
-    await playCommand(event, options.source);
+    playCommand(event, options.source);
   });
 
 // Init wizard
@@ -139,8 +139,8 @@ program
   .command("uninstall")
   .description("Remove all hooks")
   .option("--remove-config", "Also delete ~/.agent-bell/ directory")
-  .action(async (options: { removeConfig?: boolean }) => {
-    await uninstallCommand(options);
+  .action((options: { removeConfig?: boolean }) => {
+    uninstallCommand(options);
   });
 
 program.parse();

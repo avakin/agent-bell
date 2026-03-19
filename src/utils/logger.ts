@@ -1,10 +1,10 @@
 import chalk from "chalk";
-import { appendFileSync, existsSync, statSync, renameSync, mkdirSync } from "fs";
-import { homedir } from "os";
-import { join } from "path";
+import { appendFileSync, existsSync, statSync, renameSync, mkdirSync } from "node:fs";
+import { homedir } from "node:os";
+import path from "node:path";
 
-const LOG_DIR = join(homedir(), ".agent-bell");
-const LOG_FILE = join(LOG_DIR, "error.log");
+const LOG_DIR = path.join(homedir(), ".agent-bell");
+const LOG_FILE = path.join(LOG_DIR, "error.log");
 const MAX_LOG_SIZE = 1_048_576; // 1MB
 
 export function logToFile(message: string, error?: unknown): void {
@@ -28,6 +28,7 @@ export function logToFile(message: string, error?: unknown): void {
         line += `  ${error.stack}\n`;
       }
     } else if (error !== undefined) {
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string -- unknown error, best-effort stringification
       line += `  ${String(error)}\n`;
     }
 
@@ -38,11 +39,11 @@ export function logToFile(message: string, error?: unknown): void {
 }
 
 export const log = {
-  info: (msg: string) => console.log(chalk.blue("ℹ"), msg),
-  success: (msg: string) => console.log(chalk.green("✔"), msg),
-  warn: (msg: string) => console.log(chalk.yellow("⚠"), msg),
-  error: (msg: string) => console.error(chalk.red("✖"), msg),
-  dim: (msg: string) => console.log(chalk.dim(msg)),
+  info: (msg: string) => { console.log(chalk.blue("ℹ"), msg); },
+  success: (msg: string) => { console.log(chalk.green("✔"), msg); },
+  warn: (msg: string) => { console.log(chalk.yellow("⚠"), msg); },
+  error: (msg: string) => { console.error(chalk.red("✖"), msg); },
+  dim: (msg: string) => { console.log(chalk.dim(msg)); },
   banner: () => {
     console.log(chalk.bold.cyan("\n  🔔 agent-bell\n"));
   },

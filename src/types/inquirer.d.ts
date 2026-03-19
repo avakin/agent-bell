@@ -3,7 +3,7 @@ declare module "inquirer" {
     type: string;
     name: string;
     message: string;
-    choices?: Array<{ name: string; value: unknown; checked?: boolean }>;
+    choices?: { name: string; value: unknown; checked?: boolean }[];
     default?: unknown;
     validate?: (input: unknown) => boolean | string;
   }
